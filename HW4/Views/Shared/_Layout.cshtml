@@ -1,0 +1,127 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - My ASP.NET Application</title>
+    <link href="~/Content/Site.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/styles/kendo.common.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/styles/kendo.default.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/styles/kendo.common.min.css" rel="stylesheet" type="text/css" />
+    <script src="~/Scripts/modernizr-2.6.2.js"></script>
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/Scripts/js/kendo.all.min.js"></script>
+</head>
+<body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                @Html.ActionLink("圖書維護", "BooksSearch", "Home", new { area = "" }, new { @class = "navbar-brand" })
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav"></ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
+        </footer>
+    </div>
+
+</body>
+</html>
+<script type="text/javascript">
+    /**
+     *打/**就會有註解出現
+     * randomDDL
+     * randomDDL Url
+     * randomDDL value
+     * randomDDL casefrom
+     */
+    function DDL(DDLid, param, value) {//不可以取DDL，那是SQL語法的定義 randomDDL，要多下註解/*下拉要可以互相連動*/可以自己去抓DDL的input或讓kendo去抓
+        $(DDLid).kendoDropDownList({
+            //template: $("#scriptTemplate").html(),不可以放商業邏輯
+            optionLabel: "請選擇",
+            dataTextField: "Text",
+            dataValueField: "Value",
+            dataSource: {
+                serverFiltering: true,
+                transport: {
+                    read: {
+                        type: "GET",
+                        dataType: "json",
+                        url: "/Book/CallDropDownList?param=" + param
+                    }
+                }
+            },
+            dataBound: function (e) {
+                debugger;
+                if (value) {
+                    e.sender.value(value);
+                }
+            }
+        }).data("kendoDropDownList");
+    }
+
+    function GoToUrl(url) {
+        window.location.replace(url);
+    }
+
+    function deleteMsg(response, Isgrid, grid, dataItem) {
+        if (response == true) {
+            alert("書籍刪除成功");
+            if (Isgrid) {
+                grid.dataSource.remove(dataItem); //也可以用trrigerBTN來做
+            }
+        }
+        else {
+            alert("書籍借出中，無法刪除");
+        }
+    }
+
+    function SaveStatusMsg(response) {
+        if (response == "SUCCESS") {
+            alert("存檔成功");
+            if (confirm("跳回查詢頁面")) {
+                GoToUrl("/Book/BooksSearch");
+            }
+        }
+        else if (response == "NEEDKEEPER") {
+            alert("必須選擇借閱人");
+        }
+        else {
+            alert("不能選擇借閱人");
+        }
+    }
+
+    function Kendoverification(formID) {
+        var container = $(formID);
+        kendo.init(container);
+        container.kendoValidator({
+            rules: {
+                greaterdate: function (input) {
+                    if (input.is("[data-greaterdate-msg]") && input.val() != "") {//input.is("[id=iops]") //input.attr(“data-greaterdate-msg”,“验证不通过”);
+                        var date = kendo.parseDate(input.val()),
+                            otherDate = kendo.parseDate($("[name='" + input.data("greaterdateField") + "']").val());
+                        return otherDate == null || otherDate.getTime() < date.getTime();
+                    }
+
+                    return true;
+                }
+            }
+        });
+    }
+
+</script>

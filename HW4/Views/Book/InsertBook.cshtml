@@ -1,0 +1,117 @@
+﻿@model Library.Model.InserBookModel
+
+<h2>InsertBook</h2>
+
+
+@Html.AntiForgeryToken()
+
+<div id="BookData" style="text-align:left;">
+    <h4>Books</h4>
+    <hr />
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.BookName, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <p><input type="text" id="BookName" name="BookName" required="required" ></p>
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.ClassId, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <p><input type="text" id="ClassId" name="Class" required="required"></p>
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Author, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <p><input type="text" id="Author" name="Author" required="required" ></p>
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.BoughtDate, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <p><input type="text" data-role='datepicker' id="BoughtDate" name="BoughtDate" size="50" data-type="date" required="required" /></p>
+            <span data-for='BoughtDate' class='k-invalid-msg'></span>
+            @*<p><input id="BoughtDate" title="datepicker" type="date" required validationmessage="尚未填寫{0}" /></p>*@
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Publisher, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <p><input type="text" id="Publisher" name="Publisher" required="required" ></p>
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Note, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <p><textarea id="Note" name="Note" rows="10" cols="30" required="required" ></textarea></p>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <p>
+                <input type="button" value="存檔" id="save" />&nbsp;&nbsp;
+                <input type="button" value="回到查詢頁面" id="back" />
+            </p>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var BookClassName = DDL("#ClassId", "Class", null);
+        $("#BoughtDate").kendoDatePicker({ format: "{0:yyyy/MM/dd}" });
+       // var validator = $("#BookData").kendoValidator().data("kendoValidator");
+        Kendoverification("#BookData");
+        var validator = $("#BookData").data("kendoValidator");
+        $("#save").click(function (e) {
+            debugger;
+            //var datepicker = $("#BOOK_BOUGHT_DATE").data("kendoDatePicker");
+            var dateTime = new Date($("#BoughtDate").val());
+            if (validator.validate())
+            {
+                $.ajax({
+                    type: "POST",
+                    url: "/Book/InsertBook",
+                    data: {
+                        BookName: $("#BookName").val(),
+                        ClassId: $("#ClassId").val(),
+                        BoughtDate: dateTime.toISOString(),//(datepicker.value()),//可以用JS的最小日期來防，以及不能>今天日期
+                        Status: $("#Status").val(),
+                        Author: $("#Author").val(),
+                        Publisher: $("#Publisher").val(),
+                        Note: $("#Note").val()
+                    },
+                    dataType: "json",
+                    success: function (response) {
+                        debugger;
+                        if (response == "OverNow") {
+                            alert("日期不能超過今天");
+                        }
+                        else {
+                            alert("存檔成功");
+                            GoToUrl("/Book/UpdateBook?id=" + response);
+                        }
+                    },
+                    error: function (message) {
+                        debugger;
+                        GoToUrl("/Book/Error");
+                    }
+                });
+                return false;
+            }
+        });
+        debugger;
+        $("#back").click(function (e) {
+            debugger;
+            GoToUrl("/Book/BooksSearch");
+        });
+    });
+</script>

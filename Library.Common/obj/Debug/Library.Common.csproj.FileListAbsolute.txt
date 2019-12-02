@@ -1,0 +1,7 @@
+C:\Users\立寧\Desktop\HW4\Library.Common\bin\Debug\Library.Common.dll
+C:\Users\立寧\Desktop\HW4\Library.Common\bin\Debug\Library.Common.pdb
+C:\Users\立寧\Desktop\HW4\Library.Common\bin\Debug\log4net.dll
+C:\Users\立寧\Desktop\HW4\Library.Common\obj\Debug\Library.Common.csprojResolveAssemblyReference.cache
+C:\Users\立寧\Desktop\HW4\Library.Common\obj\Debug\Library.Common.csproj.CoreCompileInputs.cache
+C:\Users\立寧\Desktop\HW4\Library.Common\obj\Debug\Library.Common.dll
+C:\Users\立寧\Desktop\HW4\Library.Common\obj\Debug\Library.Common.pdb

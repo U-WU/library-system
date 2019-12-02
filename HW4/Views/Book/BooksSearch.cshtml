@@ -1,0 +1,152 @@
+﻿@model Library.Model.BookSearch
+
+<h2>圖書查詢</h2>
+
+@Html.AntiForgeryToken()
+
+<div class="form-horizontal" style="text-align:left;">
+    <hr />
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    <div class="form-group">
+        @Html.LabelFor(model => model.BookName, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <input type="text" id="bookname" name="Book_name">
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.ClassId, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <input id="classid" name="Book_class_id">
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Keeper, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <input id="keeper" name="BOOK_KEEPER">
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Status, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <input id="status" name="BOOK_STATUS">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="button" value="查詢" id="srch" />
+            <input type="button" value="清除" id="clear" />
+            <input type="button" value="新增" id="inst" />
+        </div>
+    </div>
+    <div id="grid"></div>
+</div>
+
+<script type="text/javascript">
+    function DeleteBook(button) {//欄位必填要加上***
+        var grid = $(button).closest('.k-grid').data('kendoGrid'); //get the grid
+        var dataItem = grid.dataItem($(button).closest('tr')); //get the current dataItem
+        //dataItem.BookKeeper == ""可判斷是否有人借書
+        if (confirm("確定要刪除嗎?")) {
+            $.ajax({
+                type: "POST",
+                url: "/Book/DeleteBook",
+                data: "bookId=" + dataItem.BookId,//$(this).next().next().val()要這樣取值
+                dataType: "json",
+                success: function (response) {
+                    deleteMsg(response, "grid", grid, dataItem);
+                }, error: function (error) {
+                    alert("系統發生錯誤");
+                }
+            });
+        }
+        return false;
+    }
+
+    function ModifyBook(button) {
+        var grid = $(button).closest('.k-grid').data('kendoGrid'); //get the grid
+        var dataItem = grid.dataItem($(button).closest('tr')); //get the current dataItem
+        GoToUrl("/Book/UpdateBook?id=" + dataItem.BookId);
+        return false;
+    }
+    debugger;
+    $("#srch").click(function (e) {//要判斷grid是否已存在，存在再refresh就好，美按一次就疊加一個grid
+        //資料來源物件改用Ajax
+        var dataSrc = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    type: "POST",
+                    url: "/Book/BooksSearch",
+                    dataType: "json",
+                    data: {
+                        BookName: $("#bookname").val(),
+                        ClassId: $("#classid").val(),
+                        Keeper: $("#keeper").val(),
+                        Status: $("#status").val()
+                    },
+                    error: function (message) {
+                        GoToUrl("/Book/Error");
+                    }
+                }
+            },
+            schema: {
+                model: {
+                    fields: {
+                        BookId: { type: "int" },
+                        ClassId: { type: "string" },
+                        BookName: { type: "string" },
+                        Status: { type: "string" },
+                        BoughtDate: { type: "date" },
+                        Keeper: { type: "string" }
+                    }
+                }
+            },
+            pageSize: 20,
+            serverPaging: false,
+            serverSorting: true
+        });
+        //再gloabal的CSS去做美化
+        $("#grid").kendoGrid({//資料量爆大用server去分page，要10筆就先抓10筆，到下一頁再載再抓，ajax會岔出去，不會再回來了
+            dataSource: dataSrc,
+            columns: [
+                { hidden: true, field: "BookId" },
+                { field: "ClassId", title: "圖書類別" },
+                { field: "BookName", title: "書名" },
+                { field: "BoughtDate", title: "購書日期", format: "{0:yyyy/MM/dd}" },
+                { field: "Status", title: "借閱狀態" },
+                { field: "Keeper", title: "借閱人" },
+                { template: "<button onclick='ModifyBook(this)'>編輯</button>", title: " " },//template可以下ifelse
+                { template: "<button onclick='DeleteBook(this)'>刪除</button>", title: " " }
+            ], //columns的field對應到customer資料表的欄位
+            height: 550,
+            scrollable: true,//使用server端的分頁，點選分頁將會重新綁定DataSoure給Grid
+            serverSorting: true,//使用server端的排序，點選排序將會重新綁定DataSoure給Grid
+            sortable: true,
+            filterable: true,
+            pageable: {
+                refresh: true,
+                pageSizes: true,
+            },
+            width: '800'
+        });
+    });
+
+    $(document).ready(function () {
+        $("#clear").click(function (e) {
+            GoToUrl("/Book/BooksSearch");
+        });
+
+        $("#inst").click(function (e) {
+            GoToUrl("/Book/InsertBook");
+        });
+
+        var BookClassName = DDL("#classid", "Class");
+        var BookKeeper = DDL("#keeper", "Keeper", null);
+        var Bookstatus = DDL("#status", "Status", null);
+
+        return false;
+    });
+</script>

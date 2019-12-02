@@ -1,0 +1,11 @@
+C:\Users\立寧\Desktop\HW4\Library.Model\bin\Debug\Library.Model.dll
+C:\Users\立寧\Desktop\HW4\Library.Model\bin\Debug\Library.Model.pdb
+C:\Users\立寧\Desktop\HW4\Library.Model\bin\Debug\System.Web.Mvc.dll
+C:\Users\立寧\Desktop\HW4\Library.Model\bin\Debug\Microsoft.Web.Infrastructure.dll
+C:\Users\立寧\Desktop\HW4\Library.Model\bin\Debug\System.Web.Mvc.xml
+C:\Users\立寧\Desktop\HW4\Library.Model\bin\Debug\Microsoft.Web.Infrastructure.xml
+C:\Users\立寧\Desktop\HW4\Library.Model\bin\Debug\zh-Hant\System.Web.Mvc.resources.dll
+C:\Users\立寧\Desktop\HW4\Library.Model\obj\Debug\Library.Model.csprojResolveAssemblyReference.cache
+C:\Users\立寧\Desktop\HW4\Library.Model\obj\Debug\Library.Model.csproj.CoreCompileInputs.cache
+C:\Users\立寧\Desktop\HW4\Library.Model\obj\Debug\Library.Model.dll
+C:\Users\立寧\Desktop\HW4\Library.Model\obj\Debug\Library.Model.pdb

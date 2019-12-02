@@ -1,0 +1,2 @@
+C:\Users\立寧\Desktop\HW4\Library\obj\Debug\Library.csprojResolveAssemblyReference.cache
+C:\Users\立寧\Desktop\HW4\Library\obj\Debug\Library.csproj.CoreCompileInputs.cache

@@ -1,0 +1,197 @@
+﻿@model Library.Model.Book
+
+<h2>UpdateBook</h2>
+
+
+@Html.AntiForgeryToken()
+
+<div class="form-horizontal" style="text-align:left;" id="BookData">
+    <h4>Books</h4>
+    <hr />
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.BookName, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <input type="text" id="BookName" name="BookName" required="required">
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.ClassId, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <input id="ClassId" name="Class" required="required">
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Author, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <input type="text" id="Author" name="Author" required="required">
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.BoughtDate, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <input type="text" data-role='datepicker' id="BoughtDate" name="BoughtDate" size="50" data-type="date" required="required" />
+            <span data-for='BoughtDate' class='k-invalid-msg'></span>
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Publisher, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <input type="text" id="Publisher" name="Publisher" required="required">
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Note, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <textarea id="Note" name="內容簡介" rows="10" cols="30" required="required"></textarea>
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Status, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <input id="Status" name="Status" required="required">
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Keeper, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <input id="Keeper" name="Keeper">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="button" value="存檔" id="savebtn" />
+            <input type="button" value="刪除" id="btnDelete" />&nbsp;
+            <input type="button" value="回到查詢頁面" id="back" />
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    function GetIdFromUrl() {
+        var strUrl = location.href;
+        var url = new URL(strUrl);
+        var id = url.searchParams.get("id");
+
+        return id;
+    }
+
+    $(document).ready(function () {
+        //JSON日期轉換
+        var dateRegExp = /^\/Date\((.*?)\)\/$/;
+        window.toDate = function (value) {
+            var date = dateRegExp.exec(value);
+            return new Date(parseInt(date[1]));
+        }
+
+        Kendoverification("#BookData");
+        var validator = $("#BookData").data("kendoValidator");
+        $("#BoughtDate").kendoDatePicker({ format: "{0:yyyy/MM/dd}" });//validator $().prop("required",true);商業邏輯要寫在model內
+
+        $.ajax({
+            type: "POST",
+            url: "/Book/GetBookDetail",
+            data: "bookId=" + GetIdFromUrl(),
+            dataType: "json",
+            success: function (response) {
+                var date = kendo.toString(toDate(response.BoughtDate), "yyyy/MM/dd");
+                $("#BookName").val(response.BookName);
+                var BookClassName = DDL("#ClassId", "Class", response.ClassId, null);
+                $("#Author").val(response.Author);
+                $("#BoughtDate").val(date);//可以射程唯獨或者滑鼠移開時，要判斷時間是否符合，判斷前後端都要做 ，datetime.now即可判斷時間可放在MODEL內，再用service回傳，因為是商業邏輯
+                $("#Publisher").val(response.Publisher);
+                $("#Note").val(response.Note);
+                var Bookstatus = DDL("#Status", "Status", response.Status, null);
+                var BookKeeper = DDL("#Keeper", "Keeper", response.Keeper, null);
+            }, error: function (error) {
+                alert("系統發生錯誤");
+            }
+        });
+
+        $("#Status").change(function (e) {
+            debugger;
+            if ($("#Status").val() == "A" || $("#Status").val() == "U") {
+                $("#Keeper").data("kendoDropDownList").enable(false);
+                $("#Keeper").data("kendoDropDownList").value("");
+                debugger;
+            }
+            else {
+                $("#Keeper").data("kendoDropDownList").enable();
+            }
+        });
+
+        $("#Keeper").change(function (e) {//沒有運作
+            debugger;
+            if ($("#Keeper").val() != "") {
+                $("#Status").data("kendoDropDownList").value("B");
+            }
+        });
+
+        $("#savebtn").click(function (e) {/////缺下拉連棟和日期驗證
+            var dateTime = new Date($("#BoughtDate").val());
+            if (validator.validate()) {//也可以去判斷是否有人借書
+                $.ajax({
+                    type: "POST",
+                    url: "/Book/UpdateBook",
+                    data: {
+                        BookId: GetIdFromUrl(),
+                        BookName: $("#BookName").val(),
+                        ClassId: $("#ClassId").val(),
+                        BoughtDate: dateTime.toISOString(),
+                        Status: $("#Status").val(),
+                        Author: $("#Author").val(),
+                        Publisher: $("#Publisher").val(),
+                        Note: $("#Note").val(),
+                        Keeper: $("#Keeper").val()
+                    },
+                    dataType: "json",
+                    success: function (response) {
+                        if (response == "OverNow") {
+                            alert("日期不能超過今天");
+                        }
+                        else {
+                            SaveStatusMsg(response);
+                        }
+                    },
+                    error: function (message) {
+                        GoToUrl("/Book/Error");
+                    }
+                });
+                return false;
+            }
+        });
+
+        $("#btnDelete").click(function (e) {
+
+            if (confirm("確定要刪除嗎?")) {
+                var tr = $(this).closest('tr')
+                $.ajax({
+                    type: "POST",
+                    url: "/Book/DeleteBook",
+                    data: "bookId=" + GetIdFromUrl(),
+                    dataType: "json",
+                    success: function (response) {
+                        deleteMsg(response, null,null,null);
+                    }, error: function (error) {
+                        alert("系統發生錯誤");
+                    }
+                });
+            }
+            return false;
+        });
+
+        $("#back").click(function (e) {//可以抽成JS黨
+            GoToUrl("/Book/BooksSearch");
+        });
+    });
+</script>
